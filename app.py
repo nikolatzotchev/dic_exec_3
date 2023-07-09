@@ -54,10 +54,13 @@ def image_base64_to_input_format(image_data):
 def detection_loop(images_base64):
     bounding_boxes = []
     inf_times = []
+    upload_times = []
     
     for image in images_base64:
         # decode image string:
+        upload_start = time.time()
         image_tensor = image_base64_to_input_format(image)
+        upload_end = time.time()
 
         start_time = time.time()
         result = detector(image_tensor)
@@ -71,14 +74,15 @@ def detection_loop(images_base64):
 
         bounding_boxes.append(result_list)
         inf_times.append(end_time-start_time)
+        upload_times.append(upload_end-upload_start)
         print("Done!")
     
     data = {"status": 200,
             "bounding_boxes": bounding_boxes,
             "inf_time": inf_times,
             "avg_inf_time": str(np.mean(inf_times)),
-            "upload_time": [],
-            "avg_upload_time": ""}
+            "upload_time": upload_times,
+            "avg_upload_time": str(np.mean(upload_times))}
     return jsonify(data)
 
 #initializing the flask app
